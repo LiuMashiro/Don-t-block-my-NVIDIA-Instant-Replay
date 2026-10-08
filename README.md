@@ -22,7 +22,7 @@ Tip: If you don’t need desktop recording, you can also disable it in the NVIDI
 ## Installation
 1. Install a userscript manager: Tampermonkey
 2. Import the script
-3. Navigate to web pages. When a DRM request from the page is intercepted, a control icon will appear at the bottom-right corner.
+3. Navigate to web pages. 
 
 ## Legal Disclaimer
 ```
