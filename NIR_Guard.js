@@ -2,7 +2,7 @@
 // @name         Don't block my NVIDIA Instant Replay（NIR Guard）
 // @name:zh      别碰我的即时重放
 // @namespace    local.shadowplay.guard
-// @version      2.0
+// @version      2.1
 // @description  网页请求 Widevine 等受保护内容（EME）时，在页面右上角弹出提示卡片，由用户当场决定是否放行；未放行则阻止 CDM 加载，避免 NVIDIA 即时重放被关闭。
 // @match        *://*/*
 // @run-at       document-start
@@ -30,6 +30,10 @@
 
     // 隐藏触发按钮且依旧拦截：
     quietHosts: [],
+
+    // true  : 只有网页真的请求过受保护内容时才显示 UI（推荐）
+    // false : 总是触发
+    showOnlyOnRequest: true,
 
     hotkeyAltE: true,     // 按下 Alt+E 直接唤出提示卡片
     consoleHint: false
@@ -251,6 +255,8 @@
   // ---------------------------------------------------- UI
   var UI = {
     el: null, total: 0,
+    // 网页是否请求受保护内容
+    requested: false,
     ask: { show: false, remember: false },
     hideTimer: 0, docBound: false,
 
@@ -258,8 +264,9 @@
       if (quietHere) return;
       if (window.top !== window) return;
       this.total++;
+      this.requested = true;   // 真实请求发生
       // 只有"置空"状态才每次请求都弹窗；已做过决定的状态不再打扰
-      if (!isBlank) return;
+      if (!isBlank) { this.render(); return; }
       if (this.ask.show) return;
       this.openPrompt();
     },
@@ -287,7 +294,9 @@
     },
 
     shouldExist: function () {
-      return !quietHere && window.top === window;
+      if (quietHere || window.top !== window) return false;
+      if (!CONFIG.showOnlyOnRequest) return true;
+      return this.requested || this.ask.show;
     },
 
     fonts: function () {
